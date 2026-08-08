@@ -80,18 +80,20 @@ describe("listCodexAppServerModels", () => {
       result: {
         data: [
           {
-            id: "gpt-5.4",
-            model: "gpt-5.4",
+            id: "gpt-5.6-terra",
+            model: "gpt-5.6-terra",
             upgrade: null,
             upgradeInfo: null,
             availabilityNux: null,
-            displayName: "gpt-5.4",
-            description: "GPT-5.4",
+            displayName: "GPT-5.6 Terra",
+            description: "Terra",
             hidden: false,
             inputModalities: ["text", "image"],
             supportedReasoningEfforts: [
               { reasoningEffort: "low", description: "fast" },
               { reasoningEffort: "xhigh", description: "deep" },
+              { reasoningEffort: "max", description: "maximum" },
+              { reasoningEffort: "ultra", description: "ultra" },
             ],
             defaultReasoningEffort: "medium",
             supportsPersonality: false,
@@ -106,13 +108,13 @@ describe("listCodexAppServerModels", () => {
     await expect(listPromise).resolves.toEqual({
       models: [
         {
-          id: "gpt-5.4",
-          model: "gpt-5.4",
-          displayName: "gpt-5.4",
-          description: "GPT-5.4",
+          id: "gpt-5.6-terra",
+          model: "gpt-5.6-terra",
+          displayName: "GPT-5.6 Terra",
+          description: "Terra",
           hidden: false,
           inputModalities: ["text", "image"],
-          supportedReasoningEfforts: ["low", "xhigh"],
+          supportedReasoningEfforts: ["low", "xhigh", "max", "ultra"],
           defaultReasoningEffort: "medium",
           isDefault: true,
         },

@@ -103,6 +103,30 @@ describe("readCodexModelListResponse", () => {
     expect(model?.serviceTiers).toEqual([]);
     expect(model?.supportsPersonality).toBe(false);
   });
+
+  it("accepts Terra reasoning efforts returned by Codex 0.147", () => {
+    const response = readCodexModelListResponse({
+      data: [
+        {
+          id: "gpt-5.6-terra",
+          model: "gpt-5.6-terra",
+          displayName: "GPT-5.6 Terra",
+          description: "Terra",
+          hidden: false,
+          isDefault: false,
+          defaultReasoningEffort: "medium",
+          supportedReasoningEfforts: [
+            { reasoningEffort: "max", description: "maximum reasoning" },
+            { reasoningEffort: "ultra", description: "ultra reasoning" },
+          ],
+        },
+      ],
+    });
+
+    expect(
+      response?.data[0]?.supportedReasoningEfforts.map((option) => option.reasoningEffort),
+    ).toEqual(["max", "ultra"]);
+  });
 });
 
 describe("readCodexTurn", () => {
