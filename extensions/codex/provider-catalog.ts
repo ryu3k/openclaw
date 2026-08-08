@@ -22,6 +22,14 @@ export const FALLBACK_CODEX_MODELS = [
     supportedReasoningEfforts: ["low", "medium", "high", "xhigh"],
   },
   {
+    id: "gpt-5.6-terra",
+    model: "gpt-5.6-terra",
+    displayName: "GPT-5.6 Terra",
+    description: "GPT-5.6 model that balances intelligence and cost.",
+    inputModalities: ["text", "image"],
+    supportedReasoningEfforts: ["low", "medium", "high", "xhigh", "max"],
+  },
+  {
     id: "gpt-5.4-mini",
     model: "gpt-5.4-mini",
     displayName: "GPT-5.4-Mini",

@@ -396,6 +396,35 @@ describe("buildOpenAIProvider", () => {
     });
   });
 
+  it("resolves gpt-5.6-terra locally without cached catalog metadata", () => {
+    const provider = buildOpenAIProvider();
+
+    const model = provider.resolveDynamicModel?.({
+      provider: "openai",
+      modelId: "gpt-5.6-terra",
+      modelRegistry: { find: () => null },
+    } as never);
+
+    expectFields(model, {
+      provider: "openai",
+      id: "gpt-5.6-terra",
+      api: "openai-responses",
+      baseUrl: "https://api.openai.com/v1",
+      reasoning: true,
+      input: ["text", "image"],
+      contextWindow: 1_050_000,
+      contextTokens: 272_000,
+      maxTokens: 128_000,
+      cost: { input: 2, output: 12, cacheRead: 0.2, cacheWrite: 2.5 },
+      thinkingLevelMap: { off: "none", xhigh: "xhigh", max: "max" },
+    });
+    expect(
+      provider
+        .resolveThinkingProfile?.({ provider: "openai", modelId: "gpt-5.6-terra" } as never)
+        ?.levels.map((level) => level.id),
+    ).toEqual(["off", "minimal", "low", "medium", "high", "xhigh", "max"]);
+  });
+
   it("resolves gpt-5.5-pro locally", () => {
     const provider = buildOpenAIProvider();
 
@@ -487,6 +516,12 @@ describe("buildOpenAIProvider", () => {
         modelId: "gpt-5.5",
       } as never),
     ).toBe(true);
+    expect(
+      provider.isModernModelRef?.({
+        provider: "openai",
+        modelId: "gpt-5.6-terra",
+      } as never),
+    ).toBe(true);
 
     expect(
       codexProvider.isModernModelRef?.({
@@ -516,6 +551,12 @@ describe("buildOpenAIProvider", () => {
       codexProvider.isModernModelRef?.({
         provider: "openai-codex",
         modelId: "gpt-5.5",
+      } as never),
+    ).toBe(true);
+    expect(
+      codexProvider.isModernModelRef?.({
+        provider: "openai-codex",
+        modelId: "gpt-5.6-terra",
       } as never),
     ).toBe(true);
   });

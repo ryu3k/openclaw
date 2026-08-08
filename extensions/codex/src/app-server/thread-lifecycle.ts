@@ -7,7 +7,7 @@ import {
 import { buildCodexUserMcpServersThreadConfigPatch } from "openclaw/plugin-sdk/codex-mcp-projection";
 import { listRegisteredPluginAgentPromptGuidance } from "openclaw/plugin-sdk/plugin-runtime";
 import { CODEX_GPT5_HEARTBEAT_PROMPT_OVERLAY } from "../../prompt-overlay.js";
-import { isModernCodexModel } from "../../provider.js";
+import { isMaxReasoningCodexModel, isModernCodexModel } from "../../provider.js";
 import {
   CodexAppServerRpcError,
   isCodexAppServerConnectionClosedError,
@@ -1221,8 +1221,8 @@ export function resolveCodexAppServerModelProvider(params: {
   return normalizedLower === "openai-codex" ? "openai" : normalized;
 }
 
-// Modern Codex models (gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-5.3-codex-spark) use the
-// none/low/medium/high/xhigh effort enum and reject "minimal". The CLI
+// Modern Codex models (gpt-5.6-terra, gpt-5.5, gpt-5.4, gpt-5.4-mini,
+// gpt-5.3-codex-spark) reject "minimal". The CLI
 // defaults thinkLevel to "minimal", so without translation EVERY agent turn
 // on those models pays a wasted first request + retry-with-low fallback in
 // embedded-agent-runner. Map "minimal" -> "low" upfront for modern models so the
@@ -1232,7 +1232,7 @@ export function resolveCodexAppServerModelProvider(params: {
 export function resolveReasoningEffort(
   thinkLevel: EmbeddedRunAttemptParams["thinkLevel"],
   modelId: string,
-): "minimal" | "low" | "medium" | "high" | "xhigh" | null {
+): "minimal" | "low" | "medium" | "high" | "xhigh" | "max" | null {
   if (thinkLevel === "minimal") {
     return isModernCodexModel(modelId) ? "low" : "minimal";
   }
@@ -1243,6 +1243,9 @@ export function resolveReasoningEffort(
     thinkLevel === "xhigh"
   ) {
     return thinkLevel;
+  }
+  if (thinkLevel === "max" && isMaxReasoningCodexModel(modelId)) {
+    return "max";
   }
   return null;
 }

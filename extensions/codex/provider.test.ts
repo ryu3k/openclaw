@@ -18,7 +18,11 @@ afterEach(() => {
 function expectStaticFallbackCatalog(
   result: Awaited<ReturnType<typeof buildCodexProviderCatalog>>,
 ) {
-  expect(result.provider.models.map((model) => model.id)).toEqual(["gpt-5.5", "gpt-5.4-mini"]);
+  expect(result.provider.models.map((model) => model.id)).toEqual([
+    "gpt-5.5",
+    "gpt-5.6-terra",
+    "gpt-5.4-mini",
+  ]);
 }
 
 function createFakeCodexClient(): CodexAppServerClient {
@@ -327,6 +331,27 @@ describe("codex provider", () => {
       id: "gpt-5.5",
       input: ["text", "image"],
     });
+
+    const terra = provider.resolveDynamicModel?.({
+      provider: "codex",
+      modelId: "gpt-5.6-terra",
+      modelRegistry: { find: () => null },
+    } as never);
+
+    expectRecordFields(terra, {
+      id: "gpt-5.6-terra",
+      input: ["text", "image"],
+      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+      compat: { supportsReasoningEffort: true, supportsUsageInStreaming: true },
+    });
+    expect(
+      provider
+        .resolveThinkingProfile?.({
+          provider: "codex",
+          modelId: "gpt-5.6-terra",
+        } as never)
+        ?.levels.map((level) => level.id),
+    ).toEqual(["off", "minimal", "low", "medium", "high", "xhigh", "max"]);
   });
 
   it("treats o4 ids as reasoning-capable Codex models", () => {
@@ -396,7 +421,7 @@ describe("codex provider", () => {
 
     expect(
       result && "provider" in result ? result.provider.models.map((model) => model.id) : [],
-    ).toEqual(["gpt-5.5", "gpt-5.4-mini"]);
+    ).toEqual(["gpt-5.5", "gpt-5.6-terra", "gpt-5.4-mini"]);
   });
 
   it("adds the GPT-5 prompt overlay to Codex provider runs", () => {

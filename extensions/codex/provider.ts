@@ -108,6 +108,7 @@ export function buildCodexProvider(options: BuildCodexProviderOptions = {}): Pro
         { id: "medium" },
         { id: "high" },
         ...(isKnownXHighCodexModel(modelId) ? [{ id: "xhigh" as const }] : []),
+        ...(isMaxReasoningCodexModel(modelId) ? [{ id: "max" as const }] : []),
       ],
     }),
     resolveSystemPromptContribution: ({ config, modelId }) =>
@@ -233,14 +234,19 @@ function isKnownXHighCodexModel(modelId: string): boolean {
 
 // Exported so adapter request paths (thread-lifecycle.resolveReasoningEffort)
 // can branch on model-family enum support: modern Codex models use the
-// none/low/medium/high/xhigh effort enum and reject "minimal", which is the
+// none/low/medium/high/xhigh/max effort enum and reject "minimal", which is the
 // CLI default. (#71946)
 export function isModernCodexModel(modelId: string): boolean {
   const lower = modelId.trim().toLowerCase();
   return (
+    lower === "gpt-5.6-terra" ||
     lower === "gpt-5.5" ||
     lower === "gpt-5.4" ||
     lower === "gpt-5.4-mini" ||
     lower === "gpt-5.3-codex-spark"
   );
+}
+
+export function isMaxReasoningCodexModel(modelId: string): boolean {
+  return modelId.trim().toLowerCase() === "gpt-5.6-terra";
 }

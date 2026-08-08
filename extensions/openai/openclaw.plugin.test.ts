@@ -27,6 +27,17 @@ const manifest = JSON.parse(
     groupLabel?: string;
     groupHint?: string;
   }>;
+  modelCatalog?: {
+    providers?: Record<
+      string,
+      {
+        models?: Array<{
+          id?: string;
+          cost?: { input?: number; output?: number; cacheRead?: number; cacheWrite?: number };
+        }>;
+      }
+    >;
+  };
 };
 
 const packageJson = JSON.parse(
@@ -95,6 +106,14 @@ describe("OpenAI plugin manifest", () => {
   it("keeps runtime dependencies in the package manifest", () => {
     expect(packageJson.devDependencies?.["@openclaw/plugin-sdk"]).toBe("workspace:*");
     expect(packageJson.dependencies?.ws).toBe("8.21.0");
+  });
+
+  it("keeps GPT-5.6 Terra subscription cost metadata at zero", () => {
+    const terra = manifest.modelCatalog?.providers?.["openai-codex"]?.models?.find(
+      (model) => model.id === "gpt-5.6-terra",
+    );
+
+    expect(terra?.cost).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
   });
 
   it("keeps removed Codex CLI import auth choice as a deprecated browser-login alias", () => {

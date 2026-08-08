@@ -385,6 +385,68 @@ describe("openai codex provider", () => {
     ).toBe("native");
   });
 
+  it("resolves gpt-5.6-terra through the Codex OAuth transport", () => {
+    const provider = buildOpenAICodexProviderPlugin();
+
+    const model = provider.resolveDynamicModel?.({
+      provider: "openai-codex",
+      modelId: "gpt-5.6-terra",
+      modelRegistry: { find: () => null },
+    } as never);
+
+    expectModelFields(model, {
+      id: "gpt-5.6-terra",
+      name: "GPT-5.6 Terra",
+      api: "openai-codex-responses",
+      provider: "openai-codex",
+      baseUrl: "https://chatgpt.com/backend-api/codex",
+      reasoning: true,
+      input: ["text", "image"],
+      contextWindow: 372_000,
+      contextTokens: 272_000,
+      maxTokens: 128_000,
+      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+      thinkingLevelMap: { off: null, xhigh: "xhigh", max: "max" },
+    });
+    expect(
+      provider.preferRuntimeResolvedModel?.({
+        provider: "openai-codex",
+        modelId: "gpt-5.6-terra",
+      } as never),
+    ).toBe(true);
+    expect(
+      provider
+        .resolveThinkingProfile?.({
+          provider: "openai-codex",
+          modelId: "gpt-5.6-terra",
+        } as never)
+        ?.levels.map((level) => level.id),
+    ).toEqual(["off", "minimal", "low", "medium", "high", "xhigh", "max"]);
+  });
+
+  it("preserves zero-cost subscription metadata for registered gpt-5.6-terra", () => {
+    const provider = buildOpenAICodexProviderPlugin();
+    const model = provider.resolveDynamicModel?.({
+      provider: "openai-codex",
+      modelId: "gpt-5.6-terra",
+      modelRegistry: createSingleModelRegistry(
+        createCodexTemplate({
+          id: "gpt-5.6-terra",
+          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+          contextWindow: 372_000,
+          contextTokens: 272_000,
+        }),
+      ) as never,
+    } as never);
+
+    expectModelFields(model, {
+      id: "gpt-5.6-terra",
+      contextWindow: 372_000,
+      contextTokens: 272_000,
+      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+    });
+  });
+
   it("resolves gpt-5.4 with native contextWindow plus default contextTokens cap", () => {
     const provider = buildOpenAICodexProviderPlugin();
 
