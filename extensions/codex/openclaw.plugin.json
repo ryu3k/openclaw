@@ -186,6 +186,10 @@
             "type": "string",
             "enum": ["read-only", "workspace-write", "danger-full-access"]
           },
+          "workspaceWriteNetworkAccess": {
+            "type": "boolean",
+            "default": false
+          },
           "approvalsReviewer": {
             "type": "string",
             "enum": ["user", "auto_review", "guardian_subagent"]
@@ -371,6 +375,11 @@
     "appServer.sandbox": {
       "label": "Sandbox",
       "help": "Codex native sandbox mode sent to thread start and resume.",
+      "advanced": true
+    },
+    "appServer.workspaceWriteNetworkAccess": {
+      "label": "Workspace Network Access",
+      "help": "Allow network access for Codex workspace-write turns. Read-only turns remain offline.",
       "advanced": true
     },
     "appServer.approvalsReviewer": {

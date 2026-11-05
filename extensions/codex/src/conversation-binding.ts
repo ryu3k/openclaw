@@ -562,6 +562,7 @@ async function runBoundTurn(params: {
         sandboxPolicy: codexSandboxPolicyForTurn(
           execPolicy?.touched ? runtime.sandbox : (binding.sandbox ?? runtime.sandbox),
           workspaceDir,
+          runtime.workspaceWriteNetworkAccess,
         ),
         ...(binding.model ? { model: binding.model } : {}),
         personality: CODEX_NATIVE_PERSONALITY_NONE,

@@ -928,7 +928,12 @@ export function buildTurnStartParams(
     approvalPolicy: options.appServer.approvalPolicy,
     approvalsReviewer: options.appServer.approvalsReviewer,
     sandboxPolicy:
-      options.sandboxPolicy ?? codexSandboxPolicyForTurn(options.appServer.sandbox, options.cwd),
+      options.sandboxPolicy ??
+      codexSandboxPolicyForTurn(
+        options.appServer.sandbox,
+        options.cwd,
+        options.appServer.workspaceWriteNetworkAccess,
+      ),
     model: params.modelId,
     personality: CODEX_NATIVE_PERSONALITY_NONE,
     ...(options.appServer.serviceTier ? { serviceTier: options.appServer.serviceTier } : {}),

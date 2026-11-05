@@ -7,6 +7,7 @@ import {
   CODEX_PLUGIN_ENTRY_CONFIG_KEYS,
   CODEX_PLUGINS_CONFIG_KEYS,
   codexAppServerStartOptionsKey,
+  codexSandboxPolicyForTurn,
   readCodexPluginConfig,
   resolveCodexAppServerRuntimeOptions,
   resolveCodexComputerUseConfig,
@@ -60,6 +61,43 @@ function expectUiHintLabel(manifest: { uiHints: Record<string, unknown> }, key: 
 }
 
 describe("Codex app-server config", () => {
+  it("keeps workspace-write offline by default and allows explicit network access", () => {
+    expect(codexSandboxPolicyForTurn("workspace-write", "/workspace")).toEqual({
+      type: "workspaceWrite",
+      writableRoots: ["/workspace"],
+      networkAccess: false,
+      excludeTmpdirEnvVar: false,
+      excludeSlashTmp: false,
+    });
+    expect(codexSandboxPolicyForTurn("workspace-write", "/workspace", true)).toEqual({
+      type: "workspaceWrite",
+      writableRoots: ["/workspace"],
+      networkAccess: true,
+      excludeTmpdirEnvVar: false,
+      excludeSlashTmp: false,
+    });
+    expect(codexSandboxPolicyForTurn("read-only", "/workspace")).toEqual({
+      type: "readOnly",
+      networkAccess: false,
+    });
+    expect(codexSandboxPolicyForTurn("read-only", "/workspace", true)).toEqual({
+      type: "readOnly",
+      networkAccess: false,
+    });
+  });
+
+  it("accepts an explicit workspace-write network opt-in", () => {
+    expect(readCodexPluginConfig({ appServer: { workspaceWriteNetworkAccess: true } })).toEqual({
+      appServer: { workspaceWriteNetworkAccess: true },
+    });
+    expect(resolveRuntimeForTest().workspaceWriteNetworkAccess).toBe(false);
+    expect(
+      resolveRuntimeForTest({
+        pluginConfig: { appServer: { workspaceWriteNetworkAccess: true } },
+      }).workspaceWriteNetworkAccess,
+    ).toBe(true);
+  });
+
   it("only auto-approves app-server approvals for full yolo runtime policy", () => {
     expect(
       shouldAutoApproveCodexAppServerApprovals({

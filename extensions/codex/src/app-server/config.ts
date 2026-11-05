@@ -136,6 +136,7 @@ export type CodexAppServerRuntimeOptions = {
   approvalPolicy: CodexAppServerEffectiveApprovalPolicy;
   approvalPolicySource?: CodexAppServerApprovalPolicySource;
   sandbox: CodexAppServerSandboxMode;
+  workspaceWriteNetworkAccess?: boolean;
   approvalsReviewer: CodexAppServerApprovalsReviewer;
   serviceTier?: CodexServiceTier;
 };
@@ -164,6 +165,7 @@ export type CodexPluginConfig = {
     postToolRawAssistantCompletionIdleTimeoutMs?: number;
     approvalPolicy?: CodexAppServerApprovalPolicy;
     sandbox?: CodexAppServerSandboxMode;
+    workspaceWriteNetworkAccess?: boolean;
     approvalsReviewer?: CodexAppServerApprovalsReviewer;
     serviceTier?: CodexServiceTier | null;
     defaultWorkspaceDir?: string;
@@ -192,6 +194,7 @@ export const CODEX_APP_SERVER_CONFIG_KEYS = [
   "postToolRawAssistantCompletionIdleTimeoutMs",
   "approvalPolicy",
   "sandbox",
+  "workspaceWriteNetworkAccess",
   "approvalsReviewer",
   "serviceTier",
   "defaultWorkspaceDir",
@@ -309,6 +312,7 @@ const codexPluginConfigSchema = z
         postToolRawAssistantCompletionIdleTimeoutMs: z.number().positive().optional(),
         approvalPolicy: codexAppServerApprovalPolicySchema.optional(),
         sandbox: codexAppServerSandboxSchema.optional(),
+        workspaceWriteNetworkAccess: z.boolean().optional(),
         approvalsReviewer: codexAppServerApprovalsReviewerSchema.optional(),
         serviceTier: codexAppServerServiceTierSchema,
         defaultWorkspaceDir: z.string().optional(),
@@ -533,6 +537,7 @@ export function resolveCodexAppServerRuntimeOptions(
       configuredSandbox ??
       defaultPolicy?.sandbox ??
       (policyMode === "guardian" ? "workspace-write" : "danger-full-access"),
+    workspaceWriteNetworkAccess: config.workspaceWriteNetworkAccess === true,
     approvalsReviewer:
       forcedPolicy?.approvalsReviewer ??
       explicitApprovalsReviewer ??
@@ -649,6 +654,7 @@ export function codexAppServerStartOptionsKey(
 export function codexSandboxPolicyForTurn(
   mode: CodexAppServerSandboxMode,
   cwd: string,
+  workspaceWriteNetworkAccess = false,
 ): CodexSandboxPolicy {
   if (mode === "danger-full-access") {
     return { type: "dangerFullAccess" };
@@ -659,7 +665,7 @@ export function codexSandboxPolicyForTurn(
   return {
     type: "workspaceWrite",
     writableRoots: [cwd],
-    networkAccess: false,
+    networkAccess: workspaceWriteNetworkAccess,
     excludeTmpdirEnvVar: false,
     excludeSlashTmp: false,
   };
